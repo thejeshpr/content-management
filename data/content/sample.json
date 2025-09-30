@@ -1,0 +1,166 @@
+{
+  "meta": {
+    "title": "Comprehensive Content Page",
+    "lastUpdated": "2025-09-29T20:00:00Z"
+  },
+  "page": {
+    "header": "All Content Blocks Showcase",
+    "subheader": "A comprehensive showcase of all available content blocks."
+  },
+  "content": [
+    {
+      "order": 1,
+      "type": "header",
+      "visible": true,
+      "metadata": {
+        "name": "Main Section Header",
+        "createdAt": "2025-09-29T18:50:00Z"
+      },
+      "data": {
+        "text": "Header Block",
+        "level": 2
+      }
+    },
+    {
+      "order": 2,
+      "type": "text",
+      "visible": true,
+      "metadata": {
+        "name": "Introductory Paragraph",
+        "createdAt": "2025-09-29T18:51:00Z"
+      },
+      "data": {
+        "text": "This is a standard <b>Text Block</b>. It can contain simple formatted text."
+      }
+    },
+    {
+      "order": 3,
+      "type": "note",
+      "visible": true,
+      "metadata": {
+        "name": "An Important Note",
+        "createdAt": "2025-09-29T18:52:00Z"
+      },
+      "data": {
+        "text": "This is a Note Block, perfect for highlighting key information or quotes."
+      }
+    },
+    {
+      "order": 4,
+      "type": "link",
+      "visible": true,
+      "metadata": {
+        "name": "Simple Link",
+        "createdAt": "2025-09-29T18:53:00Z"
+      },
+      "data": {
+        "url": "https://www.google.com",
+        "text": "This is a standard Link Block.",
+        "style": "link"
+      }
+    },
+    {
+      "order": 5,
+      "type": "link",
+      "visible": true,
+      "metadata": {
+        "name": "Button Link",
+        "createdAt": "2025-09-29T18:54:00Z"
+      },
+      "data": {
+        "url": "https://www.google.com/doodles",
+        "text": "This is a Link Block styled as a button.",
+        "style": "button"
+      }
+    },
+    {
+      "order": 6,
+      "type": "list",
+      "visible": true,
+      "metadata": {
+        "name": "Unordered List",
+        "createdAt": "2025-09-29T18:55:00Z"
+      },
+      "data": {
+        "style": "unordered",
+        "items": [
+          "First item",
+          "Second item",
+          "Third item"
+        ]
+      }
+    },
+    {
+      "order": 7,
+      "type": "list",
+      "visible": true,
+      "metadata": {
+        "name": "Ordered List",
+        "createdAt": "2025-09-29T18:56:00Z"
+      },
+      "data": {
+        "style": "ordered",
+        "items": [
+          "First item",
+          "Second item",
+          "Third item"
+        ]
+      }
+    },
+    {
+      "order": 8,
+      "type": "image",
+      "visible": true,
+      "metadata": {
+        "name": "Image Block",
+        "createdAt": "2025-09-29T18:57:00Z"
+      },
+      "data": {
+        "url": "https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png",
+        "caption": "This is an Image Block with a caption."
+      }
+    },
+    {
+      "order": 9,
+      "type": "video",
+      "visible": true,
+      "metadata": {
+        "name": "Demo Video",
+        "createdAt": "2025-09-29T18:58:00Z"
+      },
+      "data": {
+        "url": "https://www.youtube.com/watch?v=rokGy0huYEA",
+        "caption": "This is a Video Block with a caption."
+      }
+    },
+    {
+      "order": 10,
+      "type": "code_block",
+      "visible": true,
+      "metadata": {
+        "name": "Sample Python Code",
+        "createdAt": "2025-09-29T18:59:00Z"
+      },
+      "data": {
+        "language": "python",
+        "code": "def hello_world():\n    print(\"Hello, from a Code Block!\")\n\nhello_world()"
+      }
+    },
+    {
+      "order": 11,
+      "type": "table",
+      "visible": true,
+      "metadata": {
+        "name": "Summary Table",
+        "createdAt": "2025-09-29T19:00:00Z"
+      },
+      "data": {
+        "headers": ["Column A", "Column B", "Column C"],
+        "rows": [
+          ["Row 1, Cell 1", "Row 1, Cell 2", "Row 1, Cell 3"],
+          ["Row 2, Cell 1", "Row 2, Cell 2", "Row 2, Cell 3"]
+        ]
+      }
+    }
+  ]
+}

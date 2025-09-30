@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Editor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #121212; color: #e0e0e0; }
+        .text-muted { color: #a0a0a0 !important; }
+        .form-control, .form-select { background-color: #2a2a2a; color: #e0e0e0; border-color: #444; }
+        .btn-primary { background-color: #bb86fc; border-color: #bb86fc; color: #121212; }
+        .btn-danger { background-color: #cf6679; border-color: #cf6679; color: #121212; }
+        .btn-secondary { background-color: #03dac6; border-color: #03dac6; color: #121212; }
+        .content-block { margin-bottom: 1.5rem; padding: 1.5rem; background-color: #1e1e1e; border-radius: 0.5rem; border: 1px solid #333; }
+        #json-viewer-container { position: sticky; top: 2rem; }
+        #json-viewer { background-color: #1e1e1e; border: 1px solid #333; border-radius: 0.5rem; padding: 1rem; height: 60vh; overflow-y: auto; white-space: pre-wrap; font-family: monospace; }
+        .modal-content { background-color: #1e1e1e; border: 1px solid #333; }
+        .form-text { color: #a0a0a0; }
+        .move-btns button { padding: 0.1rem 0.4rem; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="modal fade" id="addBlockModal" tabindex="-1" aria-labelledby="addBlockModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addBlockModalLabel">Add New Content Block</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="new-block-type" class="form-label">Block Type</label>
+                        <select id="new-block-type" class="form-select">
+                            <option value="header">Header</option>
+                            <option value="text">Text</option>
+                            <option value="note">Note</option>
+                            <option value="link">Link</option>
+                            <option value="image">Image</option>
+                            <option value="video">Video</option>
+                            <option value="list">List</option>
+                            <option value="code_block">Code Block</option>
+                            <option value="table">Table</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="confirm-add-btn" class="btn btn-primary">Add Block</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid py-4 px-4">
+        <header class="mb-4 text-center">
+            <h1 class="display-5">Content Editor</h1>
+            <p class="text-muted">Load, edit, and view JSON content dynamically.</p>
+        </header>
+        <div class="row">
+            <div class="col-lg-7">
+                <div class="input-group mb-3"><input type="text" id="json-url" class="form-control" placeholder="Enter URL to a content JSON file..."><button id="load-btn" class="btn btn-primary">Load</button><button id="new-btn" class="btn btn-success">Create New</button></div>
+                <div id="editor-area"></div>
+                <div class="d-grid gap-2"><button type="button" class="btn btn-secondary mt-3" data-bs-toggle="modal" data-bs-target="#addBlockModal">Add New Content Block</button></div>
+            </div>
+            <div class="col-lg-5">
+                <div id="json-viewer-container">
+                    <h3>Live JSON Output</h3><pre id="json-viewer">{}</pre>
+                    <div class="mt-2 d-flex gap-2"><button id="copy-json-btn" class="btn btn-sm btn-outline-primary">Copy JSON</button><button id="download-json-btn" class="btn btn-sm btn-outline-primary">Download JSON</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const urlInput = document.getElementById('json-url');
+        const loadBtn = document.getElementById('load-btn');
+        const newBtn = document.getElementById('new-btn');
+        const editorArea = document.getElementById('editor-area');
+        const jsonViewer = document.getElementById('json-viewer');
+        const copyJsonBtn = document.getElementById('copy-json-btn');
+        const downloadJsonBtn = document.getElementById('download-json-btn');
+        const addBlockModal = new bootstrap.Modal(document.getElementById('addBlockModal'));
+        const newBlockTypeSelect = document.getElementById('new-block-type');
+        const confirmAddBtn = document.getElementById('confirm-add-btn');
+
+        let fullJsonData = {};
+
+        const refreshJsonView = () => {
+            jsonViewer.textContent = JSON.stringify(fullJsonData, null, 2);
+        };
+        
+        const createNewJson = () => {
+            fullJsonData = {
+                "meta": {
+                    "title": "New Content Page",
+                    "lastUpdated": new Date().toISOString()
+                },
+                "page": {
+                    "header": "New Page",
+                    "subheader": "A brand new page."
+                },
+                "content": []
+            };
+            renderEditor(fullJsonData);
+        };
+
+        const updateBlockData = (blockEl) => {
+            const index = parseInt(blockEl.dataset.index, 10);
+            const blockData = fullJsonData.content[index];
+            if (!blockData) return;
+
+            blockData.metadata.name = blockEl.querySelector('.meta-name').value;
+            blockData.visible = blockEl.querySelector('.meta-visible').checked;
+
+            const type = blockData.type;
+            switch (type) {
+                case 'header':
+                    blockData.data.text = blockEl.querySelector('.data-text').value;
+                    blockData.data.level = parseInt(blockEl.querySelector('.data-level').value, 10);
+                    break;
+                case 'text':
+                case 'note':
+                    blockData.data.text = blockEl.querySelector('.data-text').value;
+                    break;
+                case 'link':
+                    blockData.data.text = blockEl.querySelector('.data-text').value;
+                    blockData.data.url = blockEl.querySelector('.data-url').value;
+                    blockData.data.style = blockEl.querySelector('.data-style').value;
+                    break;
+                case 'image':
+                    blockData.data.url = blockEl.querySelector('.data-url').value;
+                    blockData.data.caption = blockEl.querySelector('.data-caption').value;
+                    break;
+                case 'video':
+                    blockData.data.url = blockEl.querySelector('.data-url').value;
+                    blockData.data.caption = blockEl.querySelector('.data-caption').value;
+                    break;
+                case 'list':
+                    blockData.data.style = blockEl.querySelector('.data-style').value;
+                    blockData.data.items = blockEl.querySelector('.data-items').value.split('\n');
+                    break;
+                case 'code_block':
+                    blockData.data.language = blockEl.querySelector('.data-language').value;
+                    blockData.data.code = blockEl.querySelector('.data-code').value;
+                    break;
+                case 'table':
+                    blockData.data.headers = blockEl.querySelector('.data-headers').value.split(',');
+                    blockData.data.rows = blockEl.querySelector('.data-rows').value.split('\n').map(row => row.split(','));
+                    break;
+            }
+            refreshJsonView();
+        };
+
+        const createEditorBlock = (block, index) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'content-block';
+            wrapper.dataset.index = index;
+
+            let fields = '';
+            const metadataFields = `
+                <div class="d-flex justify-content-between">
+                    <div class="flex-grow-1 me-3">
+                        <label class="form-label">Block Name</label>
+                        <input type="text" class="form-control form-control-sm meta-name" value="${block.metadata.name}">
+                    </div>
+                    <div class="form-check form-switch align-self-end mb-2">
+                        <input class="form-check-input meta-visible" type="checkbox" role="switch" ${block.visible ? 'checked' : ''}>
+                        <label class="form-check-label">Visible</label>
+                    </div>
+                </div>
+                <hr class="border-secondary">`;
+            const codeLangs = ['javascript', 'python', 'html', 'css', 'json', 'sql', 'bash', 'plaintext'];
+
+            switch (block.type) {
+                case 'header':
+                    fields = `<label class="form-label">Text</label><input type="text" class="form-control data-text" value="${block.data.text || ''}"><label class="form-label mt-2">Level</label><select class="form-select data-level">${[1,2,3,4,5,6].map(l => `<option value="${l}" ${block.data.level === l ? 'selected' : ''}>H${l}</option>`).join('')}</select>`;
+                    break;
+                case 'text':
+                case 'note':
+                    fields = `<label class="form-label">Text</label><textarea class="form-control data-text" rows="3">${block.data.text || ''}</textarea>`;
+                    break;
+                case 'link':
+                    fields = `<label class="form-label">Text</label><input type="text" class="form-control data-text" value="${block.data.text || ''}"><label class="form-label mt-2">URL</label><input type="text" class="form-control data-url" value="${block.data.url || ''}"><label class="form-label mt-2">Style</label><select class="form-select data-style"><option value="link" ${block.data.style === 'link' ? 'selected' : ''}>Link</option><option value="button" ${block.data.style === 'button' ? 'selected' : ''}>Button</option></select>`;
+                    break;
+                case 'image':
+                case 'video':
+                    fields = `<label class="form-label">URL</label><input type="text" class="form-control data-url" value="${block.data.url || ''}"><label class="form-label mt-2">Caption</label><input type="text" class="form-control data-caption" value="${block.data.caption || ''}">`;
+                    break;
+                case 'list':
+                    fields = `<label class="form-label">Style</label><select class="form-select data-style"><option value="unordered" ${block.data.style === 'unordered' ? 'selected' : ''}>Unordered</option><option value="ordered" ${block.data.style === 'ordered' ? 'selected' : ''}>Ordered</option></select><label class="form-label mt-2">Items (one per line)</label><textarea class="form-control data-items" rows="4">${(block.data.items || []).join('\n')}</textarea>`;
+                    break;
+                case 'code_block':
+                    const langOptions = codeLangs.map(lang => `<option value="${lang}" ${block.data.language === lang ? 'selected' : ''}>${lang}</option>`).join('');
+                    fields = `<label class="form-label">Language</label><select class="form-select data-language">${langOptions}</select><label class="form-label mt-2">Code</label><textarea class="form-control data-code" rows="6">${block.data.code || ''}</textarea>`;
+                    break;
+                case 'table':
+                    fields = `<label class="form-label">Headers (comma-separated)</label><input type="text" class="form-control data-headers" value="${(block.data.headers || []).join(',')}"><label class="form-label mt-2">Rows (one per line, cells comma-separated)</label><textarea class="form-control data-rows" rows="4">${(block.data.rows || []).map(row => row.join(',')).join('\n')}</textarea>`;
+                    break;
+            }
+
+            wrapper.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="mb-0 text-capitalize">${block.type.replace('_',' ')} Block (#${block.order})</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="move-btns btn-group">
+                            <button class="btn btn-sm btn-outline-secondary move-up-btn">↑</button>
+                            <button class="btn btn-sm btn-outline-secondary move-down-btn">↓</button>
+                        </div>
+                        <button class="btn btn-sm btn-danger remove-btn">Remove</button>
+                    </div>
+                </div>
+                ${metadataFields}${fields}
+            `;
+            
+            wrapper.addEventListener('input', () => updateBlockData(wrapper));
+            wrapper.querySelector('.remove-btn').addEventListener('click', () => {
+                if (confirm('Are you sure you want to delete this block?')) {
+                    fullJsonData.content.splice(index, 1);
+                    renderEditor({ record: fullJsonData });
+                }
+            });
+            wrapper.querySelector('.move-up-btn').addEventListener('click', () => moveBlock(index, 'up'));
+            wrapper.querySelector('.move-down-btn').addEventListener('click', () => moveBlock(index, 'down'));
+
+            return wrapper;
+        };
+
+        const renderEditor = (data) => {
+            const parsedData = data.record || data;
+            fullJsonData = parsedData;
+            editorArea.innerHTML = '';
+            if (fullJsonData.content) {
+                fullJsonData.content.sort((a, b) => a.order - b.order).forEach((block, index) => {
+                    editorArea.appendChild(createEditorBlock(block, index));
+                });
+            }
+            refreshJsonView();
+        };
+
+        const moveBlock = (index, direction) => {
+            if (direction === 'up' && index > 0) {
+                [fullJsonData.content[index], fullJsonData.content[index - 1]] = [fullJsonData.content[index - 1], fullJsonData.content[index]];
+            } else if (direction === 'down' && index < fullJsonData.content.length - 1) {
+                [fullJsonData.content[index], fullJsonData.content[index + 1]] = [fullJsonData.content[index + 1], fullJsonData.content[index]];
+            }
+
+            fullJsonData.content.forEach((block, i) => {
+                block.order = i + 1;
+            });
+
+            renderEditor({ record: fullJsonData });
+        };
+
+        const loadContent = async (url) => {
+            editorArea.innerHTML = '<p class="text-center">Loading...</p>';
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                renderEditor(data);
+            } catch (error) {
+                editorArea.innerHTML = `<div class="alert alert-danger"><strong>Failed to load content.</strong><br><small>Error: ${error.message}</small></div>`;
+                jsonViewer.textContent = '{}';
+            }
+        };
+
+        const getNewBlockData = (type) => {
+            const newBlock = {
+                order: fullJsonData.content.length + 1,
+                type: type,
+                visible: true,
+                metadata: {
+                    name: `New ${type.replace('_', ' ')}`,
+                    createdAt: new Date().toISOString()
+                },
+                data: {}
+            };
+            // Add default data structures
+            switch (type) {
+                case 'list': newBlock.data = { style: 'unordered', items: [] }; break;
+                case 'code_block': newBlock.data = { language: 'plaintext', code: '' }; break;
+                case 'table': newBlock.data = { headers: [], rows: [] }; break;
+            }
+            return newBlock;
+        };
+
+        confirmAddBtn.addEventListener('click', () => {
+            const newType = newBlockTypeSelect.value;
+            const newBlock = getNewBlockData(newType);
+            if (!fullJsonData.content) {
+                fullJsonData.content = [];
+            }
+            fullJsonData.content.push(newBlock);
+            renderEditor({ record: fullJsonData });
+            addBlockModal.hide();
+        });
+
+        copyJsonBtn.addEventListener('click', () => navigator.clipboard.writeText(jsonViewer.textContent));
+        downloadJsonBtn.addEventListener('click', () => {
+            const blob = new Blob([jsonViewer.textContent], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'content.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        loadBtn.addEventListener('click', () => { if (urlInput.value.trim()) loadContent(urlInput.value.trim()); });
+        newBtn.addEventListener('click', createNewJson);
+    </script>
+</body>
+</html>

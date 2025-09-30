@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <style>
+        body { background-color: #121212; color: #e0e0e0; }
+        .container { max-width: 800px; }
+        .text-muted { color: #a0a0a0 !important; }
+        #content-area { margin-top: 1rem; }
+        .content-block-card { margin-bottom: 1rem; background-color: #1e1e1e; border-radius: 0.5rem; border: 1px solid #333; }
+        .content-block-header { padding: 0.75rem 1.25rem; background-color: #2a2a2a; border-bottom: 1px solid #333; cursor: pointer; }
+        .content-block-header h6 { margin: 0; font-size: 1rem; color: #e0e0e0; }
+        .content-block-body { padding: 1.25rem; }
+        .metadata-time { font-size: 0.75rem; color: #888; text-align: right; line-height: 1.2; }
+        h1, h2, h3, h4, h5, h6 { color: #ffffff; }
+        a { color: #bb86fc; }
+        .btn-link-style { background-color: #bb86fc; border-color: #bb86fc; color: #121212; text-decoration: none; padding: 0.5rem 1rem; border-radius: 0.3rem; display: inline-block; }
+        .btn-link-style:hover { background-color: #a062f8; border-color: #a062f8; color: #121212; }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; background: #000; border-radius: 0.25rem; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .content-block-body pre { margin: 0; }
+        .content-block-body pre code.hljs { padding: 1em; border-radius: 0.25rem; }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <header class="mb-4">
+            <h1 id="page-header" class="display-5">Content Viewer</h1>
+            <p id="page-subheader" class="text-muted">Dynamic content page.</p>
+        </header>
+        <div class="input-group mb-3"><input type="text" id="json-url" class="form-control" value="https://api.jsonbin.io/v3/qs/68db5818d0ea881f408fe63d"><button id="load-btn" class="btn btn-primary">Load</button></div>
+        <div class="d-flex gap-2 mb-3"><button id="expand-all-btn" class="btn btn-sm btn-outline-secondary">Expand All</button><button id="collapse-all-btn" class="btn btn-sm btn-outline-secondary">Collapse All</button></div>
+        <main id="content-area"></main>
+        <footer class="text-center text-muted mt-5"><p>Powered by Gemini</p></footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        const urlInput = document.getElementById('json-url');
+        const loadBtn = document.getElementById('load-btn');
+        const contentArea = document.getElementById('content-area');
+        const pageHeader = document.getElementById('page-header');
+        const pageSubheader = document.getElementById('page-subheader');
+        const expandAllBtn = document.getElementById('expand-all-btn');
+        const collapseAllBtn = document.getElementById('collapse-all-btn');
+
+        const getYoutubeId = (url) => {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        };
+
+        const renderElement = (block, index) => {
+            if (!block.visible) return null;
+
+            const card = document.createElement('div');
+            card.className = 'content-block-card';
+            const collapseId = `collapse-${index}`;
+            
+            const createdDate = new Date(block.metadata.createdAt);
+            let timeString = `Added: ${createdDate.toLocaleString()}`;
+
+            const headerEl = document.createElement('div');
+            headerEl.className = 'content-block-header d-flex justify-content-between align-items-center';
+            headerEl.setAttribute('data-bs-toggle', 'collapse');
+            headerEl.setAttribute('data-bs-target', `#${collapseId}`);
+            headerEl.innerHTML = `<h6>#${block.order} &ndash; ${block.metadata.name || block.type}</h6><div class="metadata-time">${timeString}</div>`;
+            
+            const bodyWrapper = document.createElement('div');
+            bodyWrapper.id = collapseId;
+            bodyWrapper.className = 'collapse show';
+            const body = document.createElement('div');
+            body.className = 'content-block-body';
+            bodyWrapper.appendChild(body);
+            card.appendChild(headerEl);
+            card.appendChild(bodyWrapper);
+
+            let element;
+            switch (block.type) {
+                case 'header': element = document.createElement(`h${block.data.level || 1}`); element.textContent = block.data.text; body.appendChild(element); break;
+                case 'text': element = document.createElement('p'); element.innerHTML = block.data.text; body.appendChild(element); break;
+                case 'note': element = document.createElement('blockquote'); element.className = 'blockquote'; const p = document.createElement('p'); p.textContent = block.data.text; element.appendChild(p); body.appendChild(element); break;
+                case 'link':
+                    element = document.createElement('a');
+                    element.href = block.data.url;
+                    element.textContent = block.data.text;
+                    element.target = '_blank';
+                    if (block.data.style === 'button') element.className = 'btn-link-style';
+                    body.appendChild(element);
+                    break;
+                case 'image':
+                    element = document.createElement('img');
+                    element.src = block.data.url;
+                    element.className = 'img-fluid rounded';
+                    if (block.data.caption) { 
+                        const figure = document.createElement('figure');
+                        figure.className = 'text-center';
+                        figure.appendChild(element);
+                        const figcaption = document.createElement('figcaption');
+                        figcaption.className = 'figure-caption text-muted mt-2';
+                        figcaption.textContent = block.data.caption;
+                        figure.appendChild(figcaption);
+                        body.appendChild(figure);
+                    } else {
+                        body.appendChild(element);
+                    }
+                    break;
+                case 'video':
+                    const videoId = getYoutubeId(block.data.url);
+                    if (videoId) {
+                        const videoWrapper = document.createElement('div');
+                        videoWrapper.className = 'video-wrapper';
+                        const iframe = document.createElement('iframe');
+                        iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                        iframe.frameBorder = '0';
+                        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                        iframe.allowFullscreen = true;
+                        videoWrapper.appendChild(iframe);
+                        body.appendChild(videoWrapper);
+                        if (block.data.caption) { const caption = document.createElement('p'); caption.className = 'text-center text-muted mt-2'; caption.textContent = block.data.caption; body.appendChild(caption); }
+                    } else { body.innerHTML = `<p class="text-danger">Invalid YouTube URL</p>`; }
+                    break;
+                case 'list':
+                    element = document.createElement(block.data.style === 'ordered' ? 'ol' : 'ul');
+                    if(block.data.items) { block.data.items.forEach(itemText => { const li = document.createElement('li'); li.textContent = itemText; element.appendChild(li); }); }
+                    body.appendChild(element);
+                    break;
+                case 'code_block':
+                    element = document.createElement('pre');
+                    const code = document.createElement('code');
+                    code.className = `language-${block.data.language}`;
+                    code.textContent = block.data.code;
+                    element.appendChild(code);
+                    body.appendChild(element);
+                    break;
+                case 'table':
+                    element = document.createElement('table');
+                    element.className = 'table table-dark table-bordered';
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+                    block.data.headers.forEach(headerText => {
+                        const th = document.createElement('th');
+                        th.textContent = headerText;
+                        headerRow.appendChild(th);
+                    });
+                    thead.appendChild(headerRow);
+                    element.appendChild(thead);
+                    const tbody = document.createElement('tbody');
+                    block.data.rows.forEach(rowData => {
+                        const row = document.createElement('tr');
+                        rowData.forEach(cellData => {
+                            const td = document.createElement('td');
+                            td.textContent = cellData;
+                            row.appendChild(td);
+                        });
+                        tbody.appendChild(row);
+                    });
+                    element.appendChild(tbody);
+                    body.appendChild(element);
+                    break;
+                default: body.innerHTML = `<p class="text-danger">Unsupported content type: ${block.type}</p>`;
+            }
+            return card;
+        };
+
+        const loadContent = async (url) => {
+            contentArea.innerHTML = '<p class="text-center">Loading...</p>';
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                const jsonData = data.record || data;
+
+                contentArea.innerHTML = '';
+                document.title = jsonData.meta.title || 'Content Viewer';
+                pageHeader.textContent = jsonData.page.header || 'Content Viewer';
+                pageSubheader.textContent = jsonData.page.subheader || '';
+                
+                if (jsonData.content) {
+                    jsonData.content
+                        .filter(block => block.visible)
+                        .sort((a, b) => a.order - b.order)
+                        .forEach((block, index) => {
+                            const element = renderElement(block, index);
+                            if (element) contentArea.appendChild(element);
+                        });
+                }
+                hljs.highlightAll();
+            } catch (error) {
+                contentArea.innerHTML = `<div class="alert alert-danger"><strong>Failed to load content.</strong><br><small>Error: ${error.message}</small></div>`;
+            }
+        };
+
+        expandAllBtn.addEventListener('click', () => document.querySelectorAll('.collapse').forEach(el => bootstrap.Collapse.getOrCreateInstance(el).show()));
+        collapseAllBtn.addEventListener('click', () => document.querySelectorAll('.collapse').forEach(el => bootstrap.Collapse.getOrCreateInstance(el).hide()));
+        loadBtn.addEventListener('click', () => { if (urlInput.value.trim()) loadContent(urlInput.value.trim()); });
+        document.addEventListener('DOMContentLoaded', () => { loadContent(urlInput.value); });
+    </script>
+</body>
+</html>
