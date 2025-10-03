@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCI Content Viewer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .btn-purple {
+      background-color: #6200ea;
+      color: #ffffff;
+    }
+    .btn-purple:hover {
+      background-color: #3700b3;
+      color: #ffffff;
+    }
+    blockquote {
+      border-left: 4px solid #6200ea;
+      padding-left: 1rem;
+      margin-left: 0;
+    }
+    #markdown-content table {
+        width: 100%;
+        margin-bottom: 1rem;
+        color: #fff;
+        border-collapse: collapse;
+    }
+    #markdown-content th,
+    #markdown-content td {
+        padding: 0.75rem;
+        vertical-align: top;
+        border: 1px solid #454d55;
+    }
+    #markdown-content img {
+        max-width: 100%;
+        height: auto;
+    }
+    #markdown-content a {
+        color: #9e8aff;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <div id="alert-container"></div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>OCI Content Viewer</h1>
+        <button id="toggle-controls-btn" class="btn btn-purple">Toggle Controls</button>
+    </div>
+    <div id="controls" class="card mb-4">
+      <div class="card-body">
+        <div class="input-group mb-3">
+          <input type="text" id="json-url" class="form-control" placeholder="Enter JSON data URL">
+          <button id="load-btn" class="btn btn-purple">Load Content</button>
+        </div>
+        <div id="loading-message" class="mt-2" style="display: none;">Loading...</div>
+      </div>
+    </div>
+    <div id="content-display" class="card">
+        <div class="card-body">
+            <h2 id="heading" class="card-title"></h2>
+            <p id="subtext" class="card-subtitle mb-2 text-muted"></p>
+            <hr>
+            <div id="markdown-content"></div>
+            <hr>
+            <p id="created-time" class="text-muted small"></p>
+            <p id="footer" class="text-muted small"></p>
+        </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked-highlight/lib/index.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const jsonUrlInput = document.getElementById('json-url');
+      const loadBtn = document.getElementById('load-btn');
+      const loadingMessage = document.getElementById('loading-message');
+      const toggleControlsBtn = document.getElementById('toggle-controls-btn');
+      const controlsDiv = document.getElementById('controls');
+      const alertContainer = document.getElementById('alert-container');
+
+      const headingEl = document.getElementById('heading');
+      const subtextEl = document.getElementById('subtext');
+      const markdownContentEl = document.getElementById('markdown-content');
+      const createdTimeEl = document.getElementById('created-time');
+      const footerEl = document.getElementById('footer');
+
+      const markedExtended = new marked.Marked(
+        markedHighlight.markedHighlight({
+          langPrefix: 'hljs language-',
+          highlight(code, lang) {
+            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+            return hljs.highlight(code, { language }).value;
+          }
+        })
+      );
+
+      const showAlert = (message, type = 'danger') => {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = [
+          `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+          `   <div>${message}</div>`,
+          '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+          '</div>'
+        ].join('');
+        alertContainer.append(wrapper);
+      };
+
+      const loadContent = async () => {
+        const url = jsonUrlInput.value;
+        if (!url) return;
+
+        loadingMessage.style.display = 'block';
+        loadBtn.disabled = true;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+
+            headingEl.textContent = data.heading;
+            subtextEl.textContent = data.subtext;
+            markdownContentEl.innerHTML = window.DOMPurify ? DOMPurify.sanitize(markedExtended.parse(data.markdown_content)) : markedExtended.parse(data.markdown_content);
+            createdTimeEl.textContent = `Created: ${new Date(data.created_time).toLocaleString()}`;
+            footerEl.textContent = data.footer;
+
+        } catch (error) {
+            console.error("Error loading or parsing JSON:", error);
+            showAlert("Failed to load content. Please check the URL and ensure the API has CORS enabled. Open the browser's developer console for more details.");
+        } finally {
+            loadingMessage.style.display = 'none';
+            loadBtn.disabled = false;
+        }
+      };
+
+      // Handle ?json_url query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const jsonUrl = urlParams.get('json_url');
+      if (jsonUrl) {
+        jsonUrlInput.value = jsonUrl;
+        loadContent();
+      }
+
+      loadBtn.addEventListener('click', loadContent);
+
+      toggleControlsBtn.addEventListener('click', () => {
+          controlsDiv.style.display = controlsDiv.style.display === 'none' ? 'block' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>
