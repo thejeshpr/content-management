@@ -1,0 +1,7 @@
+{
+  "heading": "My First Post",
+  "subtext": "A journey into the world of static site generators.",
+  "created_time": "2025-10-10T10:00:00Z",
+  "footer": "© 2025 My Awesome Website",
+  "markdown_content": "## Welcome to my blog!\n\nThis is my first post, written in GitHub-Flavored Markdown. I can embed HTML like this: <p>This is a paragraph.</p>\n\nHere is a list:\n\n* Item 1\n* Item 2\n* Item 3\n\nAnd a code block:\n\n```javascript\nconsole.log(\"Hello, world!\");\n```"
+}
