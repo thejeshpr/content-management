@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCI Content Viewer</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Highlight.js (GitHub Dark theme) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+
+  <style>
+    .btn-purple { background-color: #6200ea; color: #ffffff; }
+    .btn-purple:hover { background-color: #3700b3; color: #ffffff; }
+    blockquote { border-left: 4px solid #6200ea; padding-left: 1rem; margin-left: 0; }
+    #markdown-content table { width: 100%; margin-bottom: 1rem; color: #fff; border-collapse: collapse; }
+    #markdown-content th, #markdown-content td { padding: 0.75rem; vertical-align: top; border: 1px solid #454d55; }
+    #markdown-content img { max-width: 100%; height: auto; }
+    #markdown-content a { color: #9e8aff; }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <div id="alert-container"></div>
+
+    <!-- Header area fed by JSON (heading + subtext) -->
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <div>
+        <h1 id="page-heading" class="mb-1"></h1>
+        <p id="page-subtext" class="text-muted mb-0"></p>
+      </div>
+      <button id="toggle-controls-btn" class="btn btn-purple">Toggle Controls</button>
+    </div>
+
+    <!-- Controls -->
+    <div id="controls" class="card mb-4">
+      <div class="card-body">
+        <div class="input-group mb-3">
+          <input type="text" id="json-url" class="form-control" placeholder="Enter JSON data URL">
+          <button id="load-btn" class="btn btn-purple">Load Content</button>
+          <a href="#" id="edit-btn" class="btn btn-outline-light">Edit</a>
+        </div>
+        <div id="loading-message" class="mt-2" style="display:none;">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div id="content-display" class="card">
+      <div class="card-body">
+        <!-- Intentionally no heading/subtext here to avoid duplication -->
+        <div id="markdown-content"></div>
+        <hr>
+        <p id="created-time" class="text-muted small"></p>
+        <p id="footer" class="text-muted small"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // ======= CONFIGURE YOUR EDITOR URL HERE =======
+      const EDITOR_BASE_URL = 'https://example.com/editor.html';
+      // ==============================================
+
+      // Elements
+      const alertContainer    = document.getElementById('alert-container');
+      const toggleBtn         = document.getElementById('toggle-controls-btn');
+      const controlsCard      = document.getElementById('controls');
+      const jsonUrlInput      = document.getElementById('json-url');
+      const loadBtn           = document.getElementById('load-btn');
+      const editBtn           = document.getElementById('edit-btn');
+      const loadingMsg        = document.getElementById('loading-message');
+
+      const pageHeadingEl     = document.getElementById('page-heading');
+      const pageSubtextEl     = document.getElementById('page-subtext');
+      const markdownEl        = document.getElementById('markdown-content');
+      const createdTimeEl     = document.getElementById('created-time');
+      const footerEl          = document.getElementById('footer');
+
+      // Utils
+      const escapeHTML = (s='') => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const showAlert = (html, type = 'danger') => {
+        const div = document.createElement('div');
+        div.className = `alert alert-${type} alert-dismissible`;
+        div.role = 'alert';
+        div.innerHTML = `${html}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+        alertContainer.appendChild(div);
+      };
+
+      const stripDuplicates = (md, heading, subtext) => {
+        if (!md) return '';
+        let out = md;
+
+        if (heading) {
+          const esc = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const hRe = new RegExp(String.raw`^(?:\uFEFF)?\s*#{1,2}\s+${esc}\s*\r?\n`, 'm');
+          out = out.replace(hRe, '');
+        }
+        if (subtext) {
+          const escS = subtext.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const sRe = new RegExp(String.raw`^(?:\uFEFF)?\s*${escS}\s*\r?\n`, 'm');
+          out = out.replace(sRe, '');
+        }
+        return out;
+      };
+
+      const safeHTML = (md) => DOMPurify.sanitize(marked.parse(md || ''));
+      const highlightNow = () => markdownEl.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+
+      // Funny variants for "nothing here" (no instructions about adding URL)
+      const nothingVariants = [
+        'Nothing to see here 👀',
+        'This space intentionally left dramatic.',
+        'Here lies… absolutely nothing.',
+        '404: Fun not found.',
+        'All quiet on the content front.',
+        'Still loading… your imagination.',
+        'Silence is content too. ✨',
+        'Air. Just premium air.',
+        'If you stare long enough, it still does nothing.',
+        'Today’s special: empty plate.',
+        'Behold, the void.',
+        'Content took a day off.',
+        'Minimalism level: expert.',
+        'It’s not a bug, it’s a vibe.',
+        'Congrats! You found the secret nothing.'
+      ];
+
+      // Query params (prefers `json-url`; keeps legacy `json_url`)
+      const params = new URLSearchParams(window.location.search);
+      const getParam = (...names) => {
+        for (const n of names) {
+          const v = params.get(n);
+          if (v !== null && v !== '') return v;
+        }
+        return '';
+      };
+      const jsonParamVal = getParam('json-url', 'json_url'); // NEW then legacy
+      const lockParam    = getParam('lock-control');
+      const isLocked = (() => {
+        if (!lockParam) return false;
+        const v = String(lockParam).toLowerCase();
+        return v === 'y' || v === '1' || v === 'true' || v === 'yes' || v === 't';
+      })();
+
+      const loadContent = async () => {
+        const url = (jsonUrlInput.value || '').trim();
+        if (!url) {
+          showAlert('Please provide a JSON URL.', 'warning');
+          return;
+        }
+
+        loadingMsg.style.display = 'block';
+        loadBtn.disabled = true;
+
+        try {
+          const res = await fetch(url, { cache: 'no-cache' });
+          if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText || ''}`.trim());
+          const data = await res.json();
+
+          // Header
+          const heading = data.heading || '';
+          const subtext = data.subtext || '';
+          pageHeadingEl.textContent = heading;
+          pageSubtextEl.textContent = subtext;
+          if (heading) document.title = `${heading} · Viewer`;
+
+          // Markdown (without duplicated heading/subtext)
+          const cleaned = stripDuplicates(data.markdown_content || '', heading, subtext);
+          markdownEl.innerHTML = safeHTML(cleaned);
+          highlightNow();
+
+          // Meta
+          createdTimeEl.textContent = data.created_time
+            ? `Created: ${new Date(data.created_time).toLocaleString()}`
+            : '';
+          footerEl.textContent = data.footer || '';
+
+        } catch (err) {
+          const detail = err && (err.message || String(err)) || 'Unknown error';
+          const urlHtml = `<code>${escapeHTML(url)}</code>`;
+          const errHtml = `<code>${escapeHTML(detail)}</code>`;
+          showAlert(`Failed to load content.<br>URL: ${urlHtml}<br>Error: ${errHtml}`, 'danger');
+          console.error(err);
+        } finally {
+          loadingMsg.style.display = 'none';
+          loadBtn.disabled = false;
+        }
+      };
+
+      // Apply locking: hide controls + the toggle button
+      if (isLocked) {
+        controlsCard.style.display = 'none';
+        toggleBtn.style.display = 'none';
+      }
+
+      // Prefill & auto-load
+      if (jsonParamVal) {
+        jsonUrlInput.value = jsonParamVal;
+        loadContent(); // auto-load even if locked
+      } else if (isLocked) {
+        // Locked and no URL: show random funny notice (no instructions)
+        const msg = nothingVariants[Math.floor(Math.random() * nothingVariants.length)];
+        showAlert(msg, 'info');
+      }
+
+      // Events
+      loadBtn.addEventListener('click', loadContent);
+      toggleBtn.addEventListener('click', () => {
+        if (isLocked) return;
+        const visible = controlsCard.style.display !== 'none';
+        controlsCard.style.display = visible ? 'none' : 'block';
+      });
+
+      // EDIT button: open editor with json-url param carried over
+      editBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const activeJsonUrl = (jsonUrlInput.value || '').trim() || jsonParamVal;
+        const url = new URL(EDITOR_BASE_URL, window.location.href);
+        if (activeJsonUrl) {
+          url.searchParams.set('json-url', activeJsonUrl);
+        }
+        window.open(url.toString(), '_blank', 'noopener');
+      });
+    });
+  </script>
+</body>
+</html>
