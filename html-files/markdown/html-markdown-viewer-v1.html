@@ -25,7 +25,6 @@
     <div id="controls" class="card mb-3 shadow-sm">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span class="fw-semibold">Control Pane</span>
-        <!-- a tiny hint area if you ever want to add status -->
         <small class="text-muted" id="controls-hint" aria-live="polite"></small>
       </div>
       <div class="card-body">
@@ -38,7 +37,7 @@
       </div>
     </div>
 
-    <!-- Header: heading + subtext + created; right side: Share (always visible) + Settings gear (conditional) -->
+    <!-- Header: heading + subtext + created; right side: Share (always) + Settings gear (conditional) -->
     <div class="d-flex justify-content-between align-items-start mb-3">
       <div class="me-3">
         <h1 id="page-heading" class="mb-1"></h1>
@@ -72,7 +71,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       // ======= CONFIGURE YOUR EDITOR URL HERE =======
-      const EDITOR_BASE_URL = 'https://example.com/editor.html';
+      const EDITOR_BASE_URL = 'https://objectstorage.us-ashburn-1.oraclecloud.com/n/id5acvcl8mxn/b/bucket-dev-pub/o/html-markdown-editor-v1.html';
       // ==============================================
 
       // Elements
@@ -104,7 +103,6 @@
       const stripDuplicates = (md, heading, subtext) => {
         if (!md) return '';
         let out = md;
-
         if (heading) {
           const esc = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           const hRe = new RegExp(String.raw`^(?:\uFEFF)?\s*#{1,2}\s+${esc}\s*\r?\n`, 'm');
@@ -121,7 +119,7 @@
       const safeHTML = (md) => DOMPurify.sanitize(marked.parse(md || ''));
       const highlightNow = () => markdownEl.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
 
-      // Funny variants for locked+no URL
+      // Funny variants for locked + no URL
       const nothingVariants = [
         'Nothing to see here 👀',
         'This space intentionally left dramatic.',
@@ -142,33 +140,27 @@
 
       // Query params (prefer `json-url`; keep legacy `json_url`)
       const params = new URLSearchParams(window.location.search);
-      const getParam = (...names) => {
-        for (const n of names) {
-          const v = params.get(n);
-          if (v !== null && v !== '') return v;
-        }
-        return '';
-      };
-      const jsonParamVal = getParam('json-url', 'json_url');
-      const lockParam    = getParam('lock-control');
+      const rawNew = params.get('json-url');   // may be null, '' or value
+      const rawOld = params.get('json_url');   // legacy
+      const jsonParamVal = (rawNew && rawNew.trim() !== '') ? rawNew : ((rawOld && rawOld.trim() !== '') ? rawOld : '');
+      const jsonParamIsMissingOrEmpty = (
+        (rawNew === null || rawNew.trim() === '') &&
+        (rawOld === null || rawOld.trim() === '')
+      );
 
-      // Lock logic
-      const lockVal = (lockParam || '').toLowerCase();
-      const isLockedY = ['y','1','true','yes','t'].includes(lockVal);
-      const isLockedN = ['n','0','false','no','f'].includes(lockVal);
-      const isParamMissing = !lockParam;
+      const lockParam  = params.get('lock-control');
+      const lockVal    = (lockParam || '').toLowerCase();
+      const isLockedY  = ['y','1','true','yes','t'].includes(lockVal);
+      const isLockedN  = ['n','0','false','no','f'].includes(lockVal);
+      const noLockParam = !lockParam; // default locked
 
-      // Apply initial visibility:
-      // - If Y: show gear, controls hidden initially
-      // - If N: hide gear, controls visible
-      // - If missing: hide gear, controls hidden (default locked behavior)
-      if (isLockedY) {
-        controlsCard.style.display = 'none';
-        toggleBtn.style.display = 'inline-block';
-      } else if (isLockedN) {
+      // 🔧 Visibility rules (UPDATED):
+      // - Settings (gear) is visible ONLY when lock-control = n
+      // - Controls: visible when n; hidden when y or missing
+      if (isLockedN) {
         controlsCard.style.display = 'block';
-        toggleBtn.style.display = 'none';
-      } else { // missing
+        toggleBtn.style.display = 'inline-block';
+      } else {
         controlsCard.style.display = 'none';
         toggleBtn.style.display = 'none';
       }
@@ -218,11 +210,12 @@
         }
       };
 
-      // Prefill & auto-load
-      if (jsonParamVal) {
+      // Prefill & auto-load OR "nothing to see" when locked and no/empty URL
+      const lockedMode = isLockedY || noLockParam; // treat missing as locked by default
+      if (!jsonParamIsMissingOrEmpty) {
         jsonUrlInput.value = jsonParamVal;
         loadContent();
-      } else if (isLockedY) {
+      } else if (lockedMode) {
         const msg = nothingVariants[Math.floor(Math.random() * nothingVariants.length)];
         showAlert(msg, 'info');
       }
@@ -230,9 +223,9 @@
       // Events
       loadBtn.addEventListener('click', loadContent);
 
-      // Gear toggles controls only when lock-control=y
+      // Gear toggles controls ONLY when lock-control = n
       toggleBtn.addEventListener('click', () => {
-        if (!isLockedY) return;
+        if (!isLockedN) return;
         const visible = controlsCard.style.display !== 'none';
         controlsCard.style.display = visible ? 'none' : 'block';
       });
@@ -255,12 +248,11 @@
           return;
         }
         const shareUrl = new URL(window.location.href);
-        // enforce json-url, and ensure lock-control is not present
         shareUrl.searchParams.set('json-url', activeJsonUrl);
         shareUrl.searchParams.delete('lock-control');
 
         const title = pageHeadingEl.textContent || 'Content Viewer';
-        const text = pageSubtextEl.textContent || 'Sharing viewer link';
+        const text  = pageSubtextEl.textContent || 'Sharing viewer link';
 
         try {
           if (navigator.share) {
@@ -270,10 +262,10 @@
             showAlert('Share link copied to clipboard!', 'success');
           }
         } catch (err) {
-          if (err && err.name !== 'AbortError') {
-            showAlert('Could not share the link. Try copying it manually.', 'warning');
-            console.error(err);
-          }
+            if (err && err.name !== 'AbortError') {
+              showAlert('Could not share the link. Try copying it manually.', 'warning');
+              console.error(err);
+            }
         }
       });
     });
