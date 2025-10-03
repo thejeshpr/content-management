@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCI Content Viewer</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <style>
+    .btn-purple { background-color: #6200ea; color: #ffffff; }
+    .btn-purple:hover { background-color: #3700b3; color: #ffffff; }
+    blockquote { border-left: 4px solid #6200ea; padding-left: 1rem; margin-left: 0; }
+    #markdown-content table { width: 100%; margin-bottom: 1rem; color: #fff; border-collapse: collapse; }
+    #markdown-content th, #markdown-content td { padding: 0.75rem; vertical-align: top; border: 1px solid #454d55; }
+    #markdown-content img { max-width: 100%; height: auto; }
+    #markdown-content a { color: #9e8aff; }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <div id="alert-container"></div>
+
+    <!-- Controls (separate card with header, above heading/subtext) -->
+    <div id="controls" class="card mb-3 shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Control Pane</span>
+        <!-- a tiny hint area if you ever want to add status -->
+        <small class="text-muted" id="controls-hint" aria-live="polite"></small>
+      </div>
+      <div class="card-body">
+        <div class="input-group">
+          <input type="text" id="json-url" class="form-control" placeholder="Enter JSON data URL">
+          <button id="load-btn" class="btn btn-purple">Load Content</button>
+          <a href="#" id="edit-btn" class="btn btn-success">Edit</a>
+        </div>
+        <div id="loading-message" class="mt-2" style="display:none;">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Header: heading + subtext + created; right side: Share (always visible) + Settings gear (conditional) -->
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <div class="me-3">
+        <h1 id="page-heading" class="mb-1"></h1>
+        <p id="page-subtext" class="text-muted mb-1"></p>
+        <p id="created-time" class="text-muted small mb-0"></p>
+      </div>
+      <div class="d-flex gap-2">
+        <button id="share-btn" class="btn btn-outline-light">Share</button>
+        <button id="toggle-controls-btn" class="btn btn-outline-secondary" title="Settings" aria-label="Settings">
+          &#9881;&nbsp;Settings
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div id="content-display" class="card">
+      <div class="card-body">
+        <div id="markdown-content"></div>
+        <hr>
+        <p id="footer" class="text-muted small"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deps -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // ======= CONFIGURE YOUR EDITOR URL HERE =======
+      const EDITOR_BASE_URL = 'https://example.com/editor.html';
+      // ==============================================
+
+      // Elements
+      const alertContainer    = document.getElementById('alert-container');
+      const controlsCard      = document.getElementById('controls');
+      const jsonUrlInput      = document.getElementById('json-url');
+      const loadBtn           = document.getElementById('load-btn');
+      const editBtn           = document.getElementById('edit-btn');
+      const shareBtn          = document.getElementById('share-btn');
+      const loadingMsg        = document.getElementById('loading-message');
+      const toggleBtn         = document.getElementById('toggle-controls-btn');
+
+      const pageHeadingEl     = document.getElementById('page-heading');
+      const pageSubtextEl     = document.getElementById('page-subtext');
+      const createdTimeEl     = document.getElementById('created-time');
+      const markdownEl        = document.getElementById('markdown-content');
+      const footerEl          = document.getElementById('footer');
+
+      // Utils
+      const escapeHTML = (s='') => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const showAlert = (html, type = 'danger') => {
+        const div = document.createElement('div');
+        div.className = `alert alert-${type} alert-dismissible`;
+        div.role = 'alert';
+        div.innerHTML = `${html}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+        alertContainer.appendChild(div);
+      };
+
+      const stripDuplicates = (md, heading, subtext) => {
+        if (!md) return '';
+        let out = md;
+
+        if (heading) {
+          const esc = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const hRe = new RegExp(String.raw`^(?:\uFEFF)?\s*#{1,2}\s+${esc}\s*\r?\n`, 'm');
+          out = out.replace(hRe, '');
+        }
+        if (subtext) {
+          const escS = subtext.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const sRe = new RegExp(String.raw`^(?:\uFEFF)?\s*${escS}\s*\r?\n`, 'm');
+          out = out.replace(sRe, '');
+        }
+        return out;
+      };
+
+      const safeHTML = (md) => DOMPurify.sanitize(marked.parse(md || ''));
+      const highlightNow = () => markdownEl.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+
+      // Funny variants for locked+no URL
+      const nothingVariants = [
+        'Nothing to see here 👀',
+        'This space intentionally left dramatic.',
+        'Here lies… absolutely nothing.',
+        '404: Fun not found.',
+        'All quiet on the content front.',
+        'Still loading… your imagination.',
+        'Silence is content too. ✨',
+        'Air. Just premium air.',
+        'If you stare long enough, it still does nothing.',
+        'Today’s special: empty plate.',
+        'Behold, the void.',
+        'Content took a day off.',
+        'Minimalism level: expert.',
+        'It’s not a bug, it’s a vibe.',
+        'Congrats! You found the secret nothing.'
+      ];
+
+      // Query params (prefer `json-url`; keep legacy `json_url`)
+      const params = new URLSearchParams(window.location.search);
+      const getParam = (...names) => {
+        for (const n of names) {
+          const v = params.get(n);
+          if (v !== null && v !== '') return v;
+        }
+        return '';
+      };
+      const jsonParamVal = getParam('json-url', 'json_url');
+      const lockParam    = getParam('lock-control');
+
+      // Lock logic
+      const lockVal = (lockParam || '').toLowerCase();
+      const isLockedY = ['y','1','true','yes','t'].includes(lockVal);
+      const isLockedN = ['n','0','false','no','f'].includes(lockVal);
+      const isParamMissing = !lockParam;
+
+      // Apply initial visibility:
+      // - If Y: show gear, controls hidden initially
+      // - If N: hide gear, controls visible
+      // - If missing: hide gear, controls hidden (default locked behavior)
+      if (isLockedY) {
+        controlsCard.style.display = 'none';
+        toggleBtn.style.display = 'inline-block';
+      } else if (isLockedN) {
+        controlsCard.style.display = 'block';
+        toggleBtn.style.display = 'none';
+      } else { // missing
+        controlsCard.style.display = 'none';
+        toggleBtn.style.display = 'none';
+      }
+
+      const loadContent = async () => {
+        const url = (jsonUrlInput.value || '').trim();
+        if (!url) {
+          showAlert('Please provide a JSON URL.', 'warning');
+          return;
+        }
+
+        loadingMsg.style.display = 'block';
+        loadBtn.disabled = true;
+
+        try {
+          const res = await fetch(url, { cache: 'no-cache' });
+          if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText || ''}`.trim());
+          const data = await res.json();
+
+          // Header
+          const heading = data.heading || '';
+          const subtext = data.subtext || '';
+          pageHeadingEl.textContent = heading;
+          pageSubtextEl.textContent = subtext;
+          createdTimeEl.textContent = data.created_time
+            ? `Created: ${new Date(data.created_time).toLocaleString()}`
+            : '';
+          if (heading) document.title = `${heading} · Viewer`;
+
+          // Markdown (without duplicated heading/subtext)
+          const cleaned = stripDuplicates(data.markdown_content || '', heading, subtext);
+          markdownEl.innerHTML = safeHTML(cleaned);
+          highlightNow();
+
+          // Footer
+          footerEl.textContent = data.footer || '';
+
+        } catch (err) {
+          const detail = err && (err.message || String(err)) || 'Unknown error';
+          const urlHtml = `<code>${escapeHTML((jsonUrlInput.value || '').trim())}</code>`;
+          const errHtml = `<code>${escapeHTML(detail)}</code>`;
+          showAlert(`Failed to load content.<br>URL: ${urlHtml}<br>Error: ${errHtml}`, 'danger');
+          console.error(err);
+        } finally {
+          loadingMsg.style.display = 'none';
+          loadBtn.disabled = false;
+        }
+      };
+
+      // Prefill & auto-load
+      if (jsonParamVal) {
+        jsonUrlInput.value = jsonParamVal;
+        loadContent();
+      } else if (isLockedY) {
+        const msg = nothingVariants[Math.floor(Math.random() * nothingVariants.length)];
+        showAlert(msg, 'info');
+      }
+
+      // Events
+      loadBtn.addEventListener('click', loadContent);
+
+      // Gear toggles controls only when lock-control=y
+      toggleBtn.addEventListener('click', () => {
+        if (!isLockedY) return;
+        const visible = controlsCard.style.display !== 'none';
+        controlsCard.style.display = visible ? 'none' : 'block';
+      });
+
+      // EDIT button: open editor with json-url param
+      editBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const activeJsonUrl = (jsonUrlInput.value || '').trim() || jsonParamVal;
+        const url = new URL(EDITOR_BASE_URL, window.location.href);
+        if (activeJsonUrl) url.searchParams.set('json-url', activeJsonUrl);
+        window.open(url.toString(), '_blank', 'noopener');
+      });
+
+      // SHARE button: always visible; share/copy link with ONLY ?json-url=<active>
+      shareBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const activeJsonUrl = (jsonUrlInput.value || '').trim() || jsonParamVal;
+        if (!activeJsonUrl) {
+          showAlert('No JSON URL to share.', 'warning');
+          return;
+        }
+        const shareUrl = new URL(window.location.href);
+        // enforce json-url, and ensure lock-control is not present
+        shareUrl.searchParams.set('json-url', activeJsonUrl);
+        shareUrl.searchParams.delete('lock-control');
+
+        const title = pageHeadingEl.textContent || 'Content Viewer';
+        const text = pageSubtextEl.textContent || 'Sharing viewer link';
+
+        try {
+          if (navigator.share) {
+            await navigator.share({ title, text, url: shareUrl.toString() });
+          } else {
+            await navigator.clipboard.writeText(shareUrl.toString());
+            showAlert('Share link copied to clipboard!', 'success');
+          }
+        } catch (err) {
+          if (err && err.name !== 'AbortError') {
+            showAlert('Could not share the link. Try copying it manually.', 'warning');
+            console.error(err);
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
