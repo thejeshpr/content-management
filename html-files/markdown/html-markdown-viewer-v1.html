@@ -15,6 +15,17 @@
     #markdown-content th, #markdown-content td { padding: 0.75rem; vertical-align: top; border: 1px solid #454d55; }
     #markdown-content img { max-width: 100%; height: auto; }
     #markdown-content a { color: #9e8aff; }
+
+    /* --- NEW: mobile-safe header layout --- */
+    .header-actions { white-space: nowrap; } /* prevent button text wrap on larger screens */
+    @media (max-width: 576px) {
+      .header-title { flex: 1 1 100%; }      /* title block takes full width */
+      .header-actions {
+        width: 100%;
+        margin-top: .5rem;                   /* push actions below title */
+        justify-content: flex-start;         /* align left on mobile */
+      }
+    }
   </style>
 </head>
 <body>
@@ -38,13 +49,14 @@
     </div>
 
     <!-- Header: heading + subtext + created; right side: Share (always) + Settings gear (conditional) -->
-    <div class="d-flex justify-content-between align-items-start mb-3">
-      <div class="me-3">
+    <!-- NEW: add flex-wrap and helper classes -->
+    <div class="d-flex flex-wrap justify-content-between align-items-start mb-3">
+      <div class="me-3 header-title">
         <h1 id="page-heading" class="mb-1"></h1>
         <p id="page-subtext" class="text-muted mb-1"></p>
         <p id="created-time" class="text-muted small mb-0"></p>
       </div>
-      <div class="d-flex gap-2">
+      <div class="d-flex gap-2 header-actions">
         <button id="share-btn" class="btn btn-outline-light">Share</button>
         <button id="toggle-controls-btn" class="btn btn-outline-secondary" title="Settings" aria-label="Settings">
           &#9881;&nbsp;Settings
@@ -68,13 +80,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- JS: unchanged -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // ======= CONFIGURE YOUR EDITOR URL HERE =======
       const EDITOR_BASE_URL = 'https://objectstorage.us-ashburn-1.oraclecloud.com/n/id5acvcl8mxn/b/bucket-dev-pub/o/html-markdown-editor-v1.html';
-      // ==============================================
 
-      // Elements
       const alertContainer    = document.getElementById('alert-container');
       const controlsCard      = document.getElementById('controls');
       const jsonUrlInput      = document.getElementById('json-url');
@@ -90,7 +100,6 @@
       const markdownEl        = document.getElementById('markdown-content');
       const footerEl          = document.getElementById('footer');
 
-      // Utils
       const escapeHTML = (s='') => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
       const showAlert = (html, type = 'danger') => {
         const div = document.createElement('div');
@@ -119,29 +128,17 @@
       const safeHTML = (md) => DOMPurify.sanitize(marked.parse(md || ''));
       const highlightNow = () => markdownEl.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
 
-      // Funny variants for locked + no URL
       const nothingVariants = [
-        'Nothing to see here 👀',
-        'This space intentionally left dramatic.',
-        'Here lies… absolutely nothing.',
-        '404: Fun not found.',
-        'All quiet on the content front.',
-        'Still loading… your imagination.',
-        'Silence is content too. ✨',
-        'Air. Just premium air.',
-        'If you stare long enough, it still does nothing.',
-        'Today’s special: empty plate.',
-        'Behold, the void.',
-        'Content took a day off.',
-        'Minimalism level: expert.',
-        'It’s not a bug, it’s a vibe.',
-        'Congrats! You found the secret nothing.'
+        'Nothing to see here 👀','This space intentionally left dramatic.','Here lies… absolutely nothing.',
+        '404: Fun not found.','All quiet on the content front.','Still loading… your imagination.',
+        'Silence is content too. ✨','Air. Just premium air.','If you stare long enough, it still does nothing.',
+        'Today’s special: empty plate.','Behold, the void.','Content took a day off.',
+        'Minimalism level: expert.','It’s not a bug, it’s a vibe.','Congrats! You found the secret nothing.'
       ];
 
-      // Query params (prefer `json-url`; keep legacy `json_url`)
       const params = new URLSearchParams(window.location.search);
-      const rawNew = params.get('json-url');   // may be null, '' or value
-      const rawOld = params.get('json_url');   // legacy
+      const rawNew = params.get('json-url');
+      const rawOld = params.get('json_url');
       const jsonParamVal = (rawNew && rawNew.trim() !== '') ? rawNew : ((rawOld && rawOld.trim() !== '') ? rawOld : '');
       const jsonParamIsMissingOrEmpty = (
         (rawNew === null || rawNew.trim() === '') &&
@@ -152,11 +149,8 @@
       const lockVal    = (lockParam || '').toLowerCase();
       const isLockedY  = ['y','1','true','yes','t'].includes(lockVal);
       const isLockedN  = ['n','0','false','no','f'].includes(lockVal);
-      const noLockParam = !lockParam; // default locked
+      const noLockParam = !lockParam;
 
-      // 🔧 Visibility rules (UPDATED):
-      // - Settings (gear) is visible ONLY when lock-control = n
-      // - Controls: visible when n; hidden when y or missing
       if (isLockedN) {
         controlsCard.style.display = 'block';
         toggleBtn.style.display = 'inline-block';
@@ -171,7 +165,6 @@
           showAlert('Please provide a JSON URL.', 'warning');
           return;
         }
-
         loadingMsg.style.display = 'block';
         loadBtn.disabled = true;
 
@@ -180,7 +173,6 @@
           if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText || ''}`.trim());
           const data = await res.json();
 
-          // Header
           const heading = data.heading || '';
           const subtext = data.subtext || '';
           pageHeadingEl.textContent = heading;
@@ -190,14 +182,11 @@
             : '';
           if (heading) document.title = `${heading} · Viewer`;
 
-          // Markdown (without duplicated heading/subtext)
           const cleaned = stripDuplicates(data.markdown_content || '', heading, subtext);
           markdownEl.innerHTML = safeHTML(cleaned);
           highlightNow();
 
-          // Footer
           footerEl.textContent = data.footer || '';
-
         } catch (err) {
           const detail = err && (err.message || String(err)) || 'Unknown error';
           const urlHtml = `<code>${escapeHTML((jsonUrlInput.value || '').trim())}</code>`;
@@ -210,8 +199,7 @@
         }
       };
 
-      // Prefill & auto-load OR "nothing to see" when locked and no/empty URL
-      const lockedMode = isLockedY || noLockParam; // treat missing as locked by default
+      const lockedMode = isLockedY || noLockParam;
       if (!jsonParamIsMissingOrEmpty) {
         jsonUrlInput.value = jsonParamVal;
         loadContent();
@@ -220,17 +208,14 @@
         showAlert(msg, 'info');
       }
 
-      // Events
       loadBtn.addEventListener('click', loadContent);
 
-      // Gear toggles controls ONLY when lock-control = n
       toggleBtn.addEventListener('click', () => {
         if (!isLockedN) return;
         const visible = controlsCard.style.display !== 'none';
         controlsCard.style.display = visible ? 'none' : 'block';
       });
 
-      // EDIT button: open editor with json-url param
       editBtn.addEventListener('click', (e) => {
         e.preventDefault();
         const activeJsonUrl = (jsonUrlInput.value || '').trim() || jsonParamVal;
@@ -239,7 +224,6 @@
         window.open(url.toString(), '_blank', 'noopener');
       });
 
-      // SHARE button: always visible; share/copy link with ONLY ?json-url=<active>
       shareBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         const activeJsonUrl = (jsonUrlInput.value || '').trim() || jsonParamVal;
@@ -262,10 +246,10 @@
             showAlert('Share link copied to clipboard!', 'success');
           }
         } catch (err) {
-            if (err && err.name !== 'AbortError') {
-              showAlert('Could not share the link. Try copying it manually.', 'warning');
-              console.error(err);
-            }
+          if (err && err.name !== 'AbortError') {
+            showAlert('Could not share the link. Try copying it manually.', 'warning');
+            console.error(err);
+          }
         }
       });
     });
