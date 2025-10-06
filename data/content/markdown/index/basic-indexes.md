@@ -31,4 +31,6 @@
    - [Interesting Team BHP thread on PRR2 and MAR Road](https://www.team-bhp.com/forum/street-experiences/291236-bangalore-10-lane-toll-free-road-cut-travel-time-between-mysore-road-magadi-road-10-mins-3.html)
    - [Metro Phase 3 - Double decker Approval](https://www.oneindia.com/bengaluru/namma-metro-phase-3-to-ease-traffic-on-orr-and-magadi-road-with-34-12-km-double-decker-flyover-7851559.html)
      > The Karnataka cabinet approved a ₹9,700-crore project for Bengaluru's Namma Metro Phase 3, featuring 34.12 km double-decker bridges on two key corridors: JP Nagar 4th Phase to Hebbal and Hosahalli to Kadabagere, with completion expected by May 2031.
-   - placeholder
+   - [Latest update on Bengaluru - Magadi road](https://www.adb.org/sites/default/files/project-documents/42513/42513-014-smr-en_11.pdf)
+     > delayed due settlement in many villages and flyover planned to come in Tavarekere junction 
+   - . 
