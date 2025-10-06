@@ -29,3 +29,6 @@
    - [Who is Who : Bangalore South All officers information](https://bengalurusouth.nic.in/en/who-is-who-new/)
    - [Magadi PWD Department](https://bengalurusouth.nic.in/en/divisions/public-works-department-pwd/)
    - [Interesting Team BHP thread on PRR2 and MAR Road](https://www.team-bhp.com/forum/street-experiences/291236-bangalore-10-lane-toll-free-road-cut-travel-time-between-mysore-road-magadi-road-10-mins-3.html)
+   - [Metro Phase 3 - Double decker Approval](https://www.oneindia.com/bengaluru/namma-metro-phase-3-to-ease-traffic-on-orr-and-magadi-road-with-34-12-km-double-decker-flyover-7851559.html)
+     > The Karnataka cabinet approved a ₹9,700-crore project for Bengaluru's Namma Metro Phase 3, featuring 34.12 km double-decker bridges on two key corridors: JP Nagar 4th Phase to Hebbal and Hosahalli to Kadabagere, with completion expected by May 2031.
+   - placeholder
