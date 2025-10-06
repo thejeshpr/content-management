@@ -28,3 +28,4 @@
    - [Railway Surver Progress - oct/2025 - bnglr circular double track survey was present](https://swr.indianrailways.gov.in/view_section.jsp?fontColor=black&backgroundColor=LIGHTSTEELBLUE&lang=0&id=0,1,828,829,1008)
    - [Who is Who : Bangalore South All officers information](https://bengalurusouth.nic.in/en/who-is-who-new/)
    - [Magadi PWD Department](https://bengalurusouth.nic.in/en/divisions/public-works-department-pwd/)
+   - [Interesting Team BHP thread on PRR2 and MAR Road](https://www.team-bhp.com/forum/street-experiences/291236-bangalore-10-lane-toll-free-road-cut-travel-time-between-mysore-road-magadi-road-10-mins-3.html)
