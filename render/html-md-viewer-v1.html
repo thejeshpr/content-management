@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Viewer</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <style>
+    .btn-purple { background-color: #6200ea; color: #ffffff; }
+    .btn-purple:hover { background-color: #3700b3; color: #ffffff; }
+    blockquote { border-left: 4px solid #6200ea; padding-left: 1rem; margin-left: 0; }
+    #markdown-content table { width: 100%; margin-bottom: 1rem; color: #fff; border-collapse: collapse; }
+    #markdown-content th, #markdown-content td { padding: 0.75rem; vertical-align: top; border: 1px solid #454d55; }
+    #markdown-content img { max-width: 100%; height: auto; }
+    #markdown-content a { color: #9e8aff; }
+
+    /* Floating Share button (mobile-safe, avoids overlapping content) */
+    .fab-share {
+      position: fixed;
+      top: 0.75rem;
+      right: 0.75rem;
+      z-index: 1040;                 /* above content */
+      box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,.35);
+    }
+    @media (min-width: 576px) {
+      .fab-share { top: 1rem; right: 1rem; }
+    }
+
+    /* If you kept a card wrapper, this removes borders; otherwise harmless */
+    .borderless-card.card { border: 0; background: transparent; }
+
+      body {
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        font-size: 1.05rem;
+        line-height: 1.6;
+      }
+      h1, h2, h3, h4, h5, h6 {
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        font-weight: 600;
+        margin-top: 1.25rem;
+        margin-bottom: 0.6rem;
+        line-height: 1.3;
+      }
+
+      p {
+        margin-bottom: 1rem;
+      }
+
+        /* Reader-friendly links (dark theme tuned) */
+          #markdown-content a {
+            color: #bb86fc;                /* soft violet */
+            text-decoration: underline;
+            transition: color 0.2s ease-in-out;
+          }
+      #markdown-content a:hover {
+    color: #e3b2ff;                /* lighter on hover */
+  }
+
+      #markdown-content a:visited {
+    color: #9b6de3;                /* slightly darker violet */
+  }
+
+  /* Keep existing blockquote + table style */
+  blockquote {
+    border-left: 4px solid #6200ea;
+    padding-left: 1rem;
+    margin-left: 0;
+    font-style: italic;
+    color: #ddd;
+  }
+
+  #markdown-content table {
+    width: 100%;
+    margin-bottom: 1rem;
+    border-collapse: collapse;
+    color: #fff;
+  }
+
+  #markdown-content th, #markdown-content td {
+    padding: 0.75rem;
+    border: 1px solid #454d55;
+  }
+
+      
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <div id="alert-container"></div>
+
+    <!-- Controls (unchanged) -->
+    <div id="controls" class="card mb-3 shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Control Pane</span>
+        <small class="text-muted" id="controls-hint" aria-live="polite"></small>
+      </div>
+      <div class="card-body">
+        <div class="input-group">
+          <input type="text" id="md-url" class="form-control" placeholder="Enter GitHub URL of a .md file">
+          <button id="load-btn" class="btn btn-purple">Load Content</button>
+          <a href="#" id="edit-btn" class="btn btn-success">Edit</a>
+        </div>
+        <div id="loading-message" class="mt-2" style="display:none;">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Removed heading/subheading/fetch-time block entirely -->
+
+    <!-- Content (borderless) -->
+    <div id="content-display" class="card borderless-card">
+      <div class="card-body p-0">
+        <div id="markdown-content" class="p-0"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Share button (always visible) -->
+  <button id="share-btn" class="btn btn-outline-light btn-sm fab-share" title="Share">Share</button>
+
+  <!-- Deps -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Elements
+      const alertContainer = document.getElementById('alert-container');
+      const controlsCard   = document.getElementById('controls');
+      const mdUrlInput     = document.getElementById('md-url');
+      const loadBtn        = document.getElementById('load-btn');
+      const editBtn        = document.getElementById('edit-btn');
+      const shareBtn       = document.getElementById('share-btn');
+      const loadingMsg     = document.getElementById('loading-message');
+
+      // Utils
+      const escapeHTML = (s='') => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const showAlert = (html, type = 'danger') => {
+        const div = document.createElement('div');
+        div.className = `alert alert-${type} alert-dismissible`;
+        div.role = 'alert';
+        div.innerHTML = `${html}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+        alertContainer.appendChild(div);
+      };
+      const safeHTML = (md) => DOMPurify.sanitize(marked.parse(md || ''));
+      const highlightNow = () => document.querySelectorAll('#markdown-content pre code').forEach(el => hljs.highlightElement(el));
+
+      // Convert GitHub URLs to raw + keep page URL for Edit
+      const normalizeGitHubUrl = (inputUrl) => {
+        try {
+          const u = new URL(inputUrl);
+          const host = u.hostname.toLowerCase();
+          if (host === 'raw.githubusercontent.com') {
+            return { raw: u.toString(), page: toGithubPageFromRaw(u) || u.toString() };
+          }
+          if (host === 'github.com') {
+            const parts = u.pathname.split('/').filter(Boolean);
+            const blobIdx = parts.indexOf('blob');
+            if (blobIdx > 1 && blobIdx < parts.length - 1) {
+              const user = parts[0], repo = parts[1];
+              const branch = parts[blobIdx + 1];
+              const path = parts.slice(blobIdx + 2).join('/');
+              const raw = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${path}`;
+              return { raw, page: u.toString() };
+            }
+            u.searchParams.set('plain', '1');
+            return { raw: u.toString(), page: u.toString() };
+          }
+          if (host === 'gist.github.com') {
+            const raw = u.toString().replace(/\/?$/, '/raw');
+            return { raw, page: u.toString() };
+          }
+          return { raw: u.toString(), page: u.toString() };
+        } catch {
+          return { raw: inputUrl, page: inputUrl };
+        }
+      };
+      function toGithubPageFromRaw(u) {
+        try {
+          if (u.hostname !== 'raw.githubusercontent.com') return null;
+          const parts = u.pathname.split('/').filter(Boolean);
+          if (parts.length < 4) return null;
+          const [user, repo, branch, ...rest] = parts;
+          return `https://github.com/${user}/${repo}/blob/${branch}/${rest.join('/')}`;
+        } catch { return null; }
+      }
+
+      // Nothing-to-see messages (when locked + no URL)
+      const nothingVariants = [
+        'Nothing to see here 👀','This space intentionally left dramatic.','Here lies… absolutely nothing.',
+        '404: Fun not found.','All quiet on the content front.','Still loading… your imagination.',
+        'Silence is content too. ✨','Air. Just premium air.','If you stare long enough, it still does nothing.',
+        'Today’s special: empty plate.','Behold, the void.','Content took a day off.',
+        'Minimalism level: expert.','It’s not a bug, it’s a vibe.','Congrats! You found the secret nothing.'
+      ];
+
+      // Query params
+      const params = new URLSearchParams(window.location.search);
+      const rawNew = params.get('md-url');
+      const rawOld = params.get('md_url');
+      const mdParamVal = (rawNew && rawNew.trim() !== '') ? rawNew : ((rawOld && rawOld.trim() !== '') ? rawOld : '');
+      const mdParamMissingOrEmpty = ((rawNew === null || rawNew.trim() === '') && (rawOld === null || rawOld.trim() === ''));
+
+      const lockParam  = params.get('lock-control');
+      const lockVal    = (lockParam || '').toLowerCase();
+      const isLockedY  = ['y','1','true','yes','t'].includes(lockVal);
+      const isLockedN  = ['n','0','false','no','f'].includes(lockVal);
+      const noLockParam = !lockParam; // default locked
+
+      // Controls visibility: gear behavior unchanged (wherever you left it); here we just show/hide controls
+      if (isLockedN) {
+        controlsCard.style.display = 'block';
+      } else {
+        controlsCard.style.display = 'none';
+      }
+
+      let lastPageUrlForEdit = '';
+
+      const loadMarkdown = async () => {
+        const input = (mdUrlInput.value || '').trim();
+        if (!input) {
+          showAlert('Please provide a GitHub URL for the Markdown file.', 'warning');
+          return;
+        }
+        const { raw, page } = normalizeGitHubUrl(input);
+        lastPageUrlForEdit = page;
+
+        loadingMsg.style.display = 'block';
+        loadBtn.disabled = true;
+
+        try {
+          const res = await fetch(raw, { cache: 'no-cache' });
+          if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText || ''}`.trim());
+          const mdText = await res.text();
+
+          document.getElementById('markdown-content').innerHTML = safeHTML(mdText);
+          highlightNow();
+        } catch (err) {
+          const detail = err && (err.message || String(err)) || 'Unknown error';
+          const urlHtml = `<code>${escapeHTML(raw)}</code>`;
+          const errHtml = `<code>${escapeHTML(detail)}</code>`;
+          showAlert(`Failed to load markdown.<br>URL: ${urlHtml}<br>Error: ${errHtml}`, 'danger');
+          console.error(err);
+        } finally {
+          loadingMsg.style.display = 'none';
+          loadBtn.disabled = false;
+        }
+      };
+
+      // Auto-load or show "nothing" when locked + no URL
+      const lockedMode = isLockedY || noLockParam;
+      if (!mdParamMissingOrEmpty) {
+        mdUrlInput.value = mdParamVal;
+        lastPageUrlForEdit = normalizeGitHubUrl(mdParamVal).page;
+        loadMarkdown();
+      } else if (lockedMode) {
+        const msg = nothingVariants[Math.floor(Math.random() * nothingVariants.length)];
+        showAlert(msg, 'info');
+      }
+
+      // Events
+      loadBtn.addEventListener('click', loadMarkdown);
+
+      // Edit opens GitHub PAGE (not raw)
+      editBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        let target = lastPageUrlForEdit || ((mdUrlInput.value || '').trim() || mdParamVal);
+        if (!target) { showAlert('No GitHub page URL available to open.', 'warning'); return; }
+        window.open(normalizeGitHubUrl(target).page, '_blank', 'noopener');
+      });
+
+      // Share (floating): share/copy with ONLY ?md-url=<active>
+      shareBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const activeInput = (mdUrlInput.value || '').trim() || mdParamVal;
+        if (!activeInput) { showAlert('No Markdown URL to share.', 'warning'); return; }
+        const shareUrl = new URL(window.location.href);
+        shareUrl.searchParams.set('md-url', activeInput);
+        shareUrl.searchParams.delete('lock-control');
+
+        try {
+          if (navigator.share) {
+            await navigator.share({ title: 'Markdown Viewer', text: '', url: shareUrl.toString() });
+          } else {
+            await navigator.clipboard.writeText(shareUrl.toString());
+            showAlert('Share link copied to clipboard!', 'success');
+          }
+        } catch (err) {
+          if (err && err.name !== 'AbortError') {
+            showAlert('Could not share the link. Try copying it manually.', 'warning');
+            console.error(err);
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
