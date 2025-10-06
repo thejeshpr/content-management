@@ -27,3 +27,4 @@
    - [Double decker suburban railway : Kengeri to mejasti](https://www.moneycontrol.com/news/india/ksr-bengaluru-city-kengeri-corridor-suburban-rail-cum-road-flyover-likely-12941477.html#google_vignette)
    - [Railway Surver Progress - oct/2025 - bnglr circular double track survey was present](https://swr.indianrailways.gov.in/view_section.jsp?fontColor=black&backgroundColor=LIGHTSTEELBLUE&lang=0&id=0,1,828,829,1008)
    - [Who is Who : Bangalore South All officers information](https://bengalurusouth.nic.in/en/who-is-who-new/)
+   - [Magadi PWD Department](https://bengalurusouth.nic.in/en/divisions/public-works-department-pwd/)
