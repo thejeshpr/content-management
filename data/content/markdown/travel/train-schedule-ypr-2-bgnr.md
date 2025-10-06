@@ -1,111 +1,115 @@
 # 🚆 Yesvantpur Jn (YPR) ⇄ B G Nagar (BGNR) — Simple Timetable
 
-> Times are scheduled. Please check live status before travel.
+> 📝 All times are scheduled. Please check live status before travel.
 
 ---
 
-## From **Yesvantpur Jn (YPR)** to **B G Nagar (BGNR)**
+## From <span class="badge bg-primary">Yesvantpur Jn (YPR)</span> ➝ <span class="badge bg-danger">B G Nagar (BGNR)</span>
 
 <ul class="list-group list-group-flush">
+
   <li class="list-group-item bg-dark text-light">
-    <div><strong>07:00 ➝ 08:12</strong></div>
-    <div class="text-muted small">Duration: 1 h 12 m</div>
-    <div class="mt-1">Runs on: <strong>Monday, Wednesday, Friday</strong></div>
+    <div><span class="badge bg-warning text-dark">07:00 AM ➝ 08:12 AM</span></div>
+    <div class="small text-muted">Duration: 1 h 12 m</div>
+    <div class="mt-1">Runs on: <span class="badge bg-primary">Monday</span> <span class="badge bg-primary">Wednesday</span> <span class="badge bg-primary">Friday</span></div>
     <div class="mt-1">Train: <strong>16515 — Yesvantpur – Karwar Express</strong></div>
   </li>
 
   <li class="list-group-item bg-dark text-light">
-    <div><strong>07:15 ➝ 08:32</strong></div>
-    <div class="text-muted small">Duration: 1 h 17 m</div>
-    <div class="mt-1">Runs on: <strong>Daily (Monday to Sunday)</strong></div>
+    <div><span class="badge bg-warning text-dark">07:15 AM ➝ 08:32 AM</span></div>
+    <div class="small text-muted">Duration: 1 h 17 m</div>
+    <div class="mt-1">Runs on: <span class="badge bg-success">Daily (Mon–Sun)</span></div>
     <div class="mt-1">Train: <strong>11311 — Solapur – Hassan Express</strong></div>
   </li>
 
   <li class="list-group-item bg-dark text-light">
-    <div><strong>18:00 ➝ 19:14</strong></div>
-    <div class="text-muted small">Duration: 1 h 14 m</div>
-    <div class="mt-1">Runs on: <strong>Daily (Monday to Sunday)</strong></div>
+    <div><span class="badge bg-warning text-dark">06:00 PM ➝ 07:14 PM</span></div>
+    <div class="small text-muted">Duration: 1 h 14 m</div>
+    <div class="mt-1">Runs on: <span class="badge bg-success">Daily (Mon–Sun)</span></div>
     <div class="mt-1">Train: <strong>22679 — InterCity SF Express</strong></div>
   </li>
 
   <li class="list-group-item bg-dark text-light">
-    <div><strong>21:47 ➝ 23:06</strong></div>
-    <div class="text-muted small">Duration: 1 h 19 m</div>
-    <div class="mt-1">Runs on: <strong>Daily (Monday to Sunday)</strong></div>
+    <div><span class="badge bg-warning text-dark">09:47 PM ➝ 11:06 PM</span></div>
+    <div class="small text-muted">Duration: 1 h 19 m</div>
+    <div class="mt-1">Runs on: <span class="badge bg-success">Daily (Mon–Sun)</span></div>
     <div class="mt-1">Train: <strong>16511 — KSR Bengaluru – Kannur Express</strong></div>
   </li>
 </ul>
 
 **Alternates (specific days):**
+
 <ul class="list-group list-group-flush">
   <li class="list-group-item bg-dark text-light">
-    <div><strong>07:00 ➝ 08:12</strong></div>
-    <div class="text-muted small">Duration: 1 h 12 m</div>
-    <div class="mt-1">Runs on: <strong>Tuesday, Thursday, Sunday</strong></div>
+    <div><span class="badge bg-warning text-dark">07:00 AM ➝ 08:12 AM</span></div>
+    <div class="small text-muted">Duration: 1 h 12 m</div>
+    <div class="mt-1">Runs on: <span class="badge bg-info text-dark">Tuesday</span> <span class="badge bg-info text-dark">Thursday</span> <span class="badge bg-info text-dark">Sunday</span></div>
     <div class="mt-1">Train: <strong>16575 — Gomteshwara Express</strong></div>
   </li>
   <li class="list-group-item bg-dark text-light">
-    <div><strong>07:00 ➝ 08:12</strong></div>
-    <div class="text-muted small">Duration: 1 h 12 m</div>
-    <div class="mt-1">Runs on: <strong>Saturday</strong></div>
+    <div><span class="badge bg-warning text-dark">07:00 AM ➝ 08:12 AM</span></div>
+    <div class="small text-muted">Duration: 1 h 12 m</div>
+    <div class="mt-1">Runs on: <span class="badge bg-warning text-dark">Saturday</span></div>
     <div class="mt-1">Train: <strong>16539 — Yesvantpur – Mangaluru Express</strong></div>
   </li>
 </ul>
 
 ---
 
-## From **B G Nagar (BGNR)** to **Yesvantpur Jn (YPR)**
+## From <span class="badge bg-primary">B G Nagar (BGNR)</span> ➝ <span class="badge bg-danger">Yesvantpur Jn (YPR)</span>
 
 <ul class="list-group list-group-flush">
+
   <li class="list-group-item bg-dark text-light">
-    <div><strong>03:54 ➝ 06:10</strong></div>
-    <div class="text-muted small">Duration: 2 h 16 m</div>
-    <div class="mt-1">Runs on: <strong>Daily (Monday to Sunday)</strong></div>
+    <div><span class="badge bg-warning text-dark">03:54 AM ➝ 06:10 AM</span></div>
+    <div class="small text-muted">Duration: 2 h 16 m</div>
+    <div class="mt-1">Runs on: <span class="badge bg-success">Daily (Mon–Sun)</span></div>
     <div class="mt-1">Train: <strong>16512 — Kannur – KSR Bengaluru Express</strong></div>
   </li>
 
   <li class="list-group-item bg-dark text-light">
-    <div><strong>08:05 ➝ 10:05</strong></div>
-    <div class="text-muted small">Duration: 2 h 0 m</div>
-    <div class="mt-1">Runs on: <strong>Daily (Monday to Sunday)</strong></div>
+    <div><span class="badge bg-warning text-dark">08:05 AM ➝ 10:05 AM</span></div>
+    <div class="small text-muted">Duration: 2 h 00 m</div>
+    <div class="mt-1">Runs on: <span class="badge bg-success">Daily (Mon–Sun)</span></div>
     <div class="mt-1">Train: <strong>22680 — InterCity SF Express</strong></div>
   </li>
 
   <li class="list-group-item bg-dark text-light">
-    <div><strong>13:59 ➝ 16:30</strong></div>
-    <div class="text-muted small">Duration: 2 h 31 m</div>
-    <div class="mt-1">Runs on: <strong>Monday, Wednesday, Friday</strong></div>
+    <div><span class="badge bg-warning text-dark">01:59 PM ➝ 04:30 PM</span></div>
+    <div class="small text-muted">Duration: 2 h 31 m</div>
+    <div class="mt-1">Runs on: <span class="badge bg-primary">Monday</span> <span class="badge bg-primary">Wednesday</span> <span class="badge bg-primary">Friday</span></div>
     <div class="mt-1">Train: <strong>16576 — Gomteshwara Express</strong></div>
   </li>
 
   <li class="list-group-item bg-dark text-light">
-    <div><strong>17:03 ➝ 19:50</strong></div>
-    <div class="text-muted small">Duration: 2 h 47 m</div>
-    <div class="mt-1">Runs on: <strong>Daily (Monday to Sunday)</strong></div>
+    <div><span class="badge bg-warning text-dark">05:03 PM ➝ 07:50 PM</span></div>
+    <div class="small text-muted">Duration: 2 h 47 m</div>
+    <div class="mt-1">Runs on: <span class="badge bg-success">Daily (Mon–Sun)</span></div>
     <div class="mt-1">Train: <strong>11312 — Hassan – Solapur Express</strong></div>
   </li>
 </ul>
 
 **Alternates (specific days):**
+
 <ul class="list-group list-group-flush">
   <li class="list-group-item bg-dark text-light">
-    <div><strong>13:59 ➝ 16:30</strong></div>
-    <div class="text-muted small">Duration: 2 h 31 m</div>
-    <div class="mt-1">Runs on: <strong>Sunday</strong></div>
+    <div><span class="badge bg-warning text-dark">01:59 PM ➝ 04:30 PM</span></div>
+    <div class="small text-muted">Duration: 2 h 31 m</div>
+    <div class="mt-1">Runs on: <span class="badge bg-warning text-dark">Sunday</span></div>
     <div class="mt-1">Train: <strong>16540 — Mangaluru – Yesvantpur Express</strong></div>
   </li>
   <li class="list-group-item bg-dark text-light">
-    <div><strong>17:49 ➝ 20:45</strong></div>
-    <div class="text-muted small">Duration: 2 h 56 m</div>
-    <div class="mt-1">Runs on: <strong>Tuesday, Thursday, Saturday</strong></div>
+    <div><span class="badge bg-warning text-dark">05:49 PM ➝ 08:45 PM</span></div>
+    <div class="small text-muted">Duration: 2 h 56 m</div>
+    <div class="mt-1">Runs on: <span class="badge bg-info text-dark">Tuesday</span> <span class="badge bg-info text-dark">Thursday</span> <span class="badge bg-info text-dark">Saturday</span></div>
     <div class="mt-1">Train: <strong>16516 — Karwar – Yesvantpur Express</strong></div>
   </li>
 </ul>
 
 ---
 
-### Why this is simpler on mobile
-- No wide tables; each train is a short block that **wraps naturally**.
-- **Full day names** for clarity.
-- **Duration** on its own small line.
-- Works on dark backgrounds via `bg-dark text-light` on each item.
+### ✅ Highlights
+- **Time badges** (yellow) make it easy to scan quickly.  
+- **Full day names** (no abbreviations).  
+- Trains are **sorted by departure time**.  
+- Optimised for **dark theme** and **mobile scrolling**.
