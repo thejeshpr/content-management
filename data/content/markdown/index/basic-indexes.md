@@ -13,7 +13,7 @@
    - [Complete history and analysis](https://objectstorage.us-ashburn-1.oraclecloud.com/n/id5acvcl8mxn/b/bucket-dev-pub/o/html-markdown-viewer-v1.html?json-url=https%3A%2F%2Fraw.githubusercontent.com%2Fthejeshpr%2Fcontent-management%2Frefs%2Fheads%2Fmain%2Fdata%2Fcontent%2Fmarkdown%2Farticles%2Firr_details.json)
 ---
  - About Radial Road (RR) - Mainly Tavarekere:
-   - [Revised Transport Master Plan - BMRDA](https://bmrda.karnataka.gov.in/storage/pdf-files/Clusters%20&%20Nodes.pdf)
+   - Revised Transport Master Plan - BMRDA [link](https://bmrda.karnataka.gov.in/storage/pdf-files/Clusters%20&%20Nodes.pdf)
    - [Old Discussion thread](https://www.mybdasites.com/viewtopic.php?p=9157)
    - [Article from 2017 - mention all RR planned and Tavarekere to Kumbalgodu](https://bangalorebuzz.blogspot.com/2007/04/12-radial-roads-for-bangalore.html)
    - [REVISED MASTER PLAN FOR BDA LOCAL PLANNING AREA - 2031 ( DRAFT ) - 38 Sigehalli to check RR passing from Tavarekere, but no information](https://data.opencity.in/dataset/bda-revised-master-plan-2031/resource/bda-revised-master-plan-2031---land-use-maps---planning-district-38-%28sulikeri---bheemanakuppe%29)
