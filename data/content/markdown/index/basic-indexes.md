@@ -3,6 +3,7 @@
 - [Devin A I  - Resume](https://objectstorage.us-ashburn-1.oraclecloud.com/n/id5acvcl8mxn/b/bucket-dev-pub/o/html-markdown-viewer-v1.html?json-url=https://raw.githubusercontent.com/thejeshpr/content-management/refs/heads/main/data/content/markdown/test/devin-ai-resume.json)
 - [Train : BG Nagara to Yeshwantpur](https://objectstorage.us-ashburn-1.oraclecloud.com/n/id5acvcl8mxn/b/bucket-dev-pub/o/html-markdown-viewer-v1.html?json-url=https://raw.githubusercontent.com/thejeshpr/content-management/refs/heads/main/data/content/markdown/travel/train-schedule-bgnagara-to-ypr.json)
 - [Train : Yeshwantpur to B G Nagara](https://objectstorage.us-ashburn-1.oraclecloud.com/n/id5acvcl8mxn/b/bucket-dev-pub/o/html-markdown-viewer-v1.html?json-url=https://raw.githubusercontent.com/thejeshpr/content-management/refs/heads/main/data/content/markdown/travel/train-schedule-ypr-to-bgnagara.json)
+- Markdown Editor - [click here](https://objectstorage.us-ashburn-1.oraclecloud.com/n/id5acvcl8mxn/b/bucket-dev-pub/o/html-markdown-editor-v1.html)
 
 ## Bengaluru
 - NPKL Extension:
