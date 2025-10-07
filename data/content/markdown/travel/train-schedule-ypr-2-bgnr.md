@@ -1,4 +1,4 @@
-# 🚆 Weekly Timetable — Yesvantpur Jn (YPR) ⇄ B G Nagar (BGNR)
+## 🚆 Train Timings — Yesvantpur Jn (YPR) ⇄ B G Nagar (BGNR)
 
 ---
 
