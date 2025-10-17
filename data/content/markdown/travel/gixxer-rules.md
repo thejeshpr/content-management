@@ -13,7 +13,7 @@ These instructions are for **our own safety** and to keep the bike in top condit
 6. **Handle the bike with care** – Treat it like your own.  
 7. **No triple riding** – Only two people allowed.  
 8. **Keep the chain clean** – Regular maintenance keeps performance smooth.  
-9. **Don’t remove the SIM from the GPS tracker** – It’s for safety and tracking.  
+9. **Don’t turn off or remove the SIM from the GPS tracker** – It’s for safety and tracking.  
 10. **No long drives** – Keep it for short or essential city rides only.  
 11. **No long-distance temple runs** – Avoid long religious trips or outstation rides.  
 12. **Check engine oil regularly** – Maintain good engine health.  
@@ -28,9 +28,12 @@ These instructions are for **our own safety** and to keep the bike in top condit
 21. **Always park the bike inside the gate before sleeping** – If you’ve used it during the day, ensure it’s safely parked inside the compound before you go to bed.  
 22. **If the bike was parked in rain, check for water around the fuel tank cap before riding again** – Prevents water from entering the tank and damaging the engine.  
 23. **Regularly inspect the bike’s overall condition** – Check brakes, tyres, lights, and other parts to avoid bigger issues later.  
-24. **Keep track of service intervals and inform me for service** – Monitor kilometres/date and notify me when the scheduled service is due.
-25. **Always Return home by 8PM** - If you are getting late, call and inform in advance.
-26. **A message for you:**  
+24. **Keep track of service intervals and inform me for service** – Monitor kilometres/date and notify me when the scheduled service is due.  
+25. **Always return home by 8:30 PM** – If you’re getting late, call and inform in advance.  
+26. **Do not skip traffic signals** – Follow all traffic rules and signals without exceptions.  
+27. **Do not park in No Parking zones** – Avoid fines and unnecessary trouble.  
+28. **Do not park exposed to the sun for long** – Prevents paint and seat from fading or cracking.  
+29. **A message for you:**  
    I’ve taken good care of this Gixxer all along — even thought about selling it a few times, but didn’t, because it means something.  
    Now it’s your turn to keep it running strong and in good condition.  
    Take care of it, and it’ll take care of you on every ride. ❤️🏍️  
