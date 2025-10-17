@@ -22,7 +22,7 @@ These instructions are for **our own safety** and to keep the bike in top condit
 15. **Always park in a safe, designated place** – Avoid no-parking zones or direct sunlight for long hours.  
 16. **Report any damage immediately** – Even small scratches or dents.  
 17. **Avoid riding in heavy rain or water-logged areas** – Protects electricals and chain.  
-18. **Switch off headlight when parked** – Prevents battery drain.  
+18. **Switch off fog lamps & headlight when parked** – Prevents battery drain.  
 19. **Don’t rev or race unnecessarily** – Wastes fuel and stresses the engine.  
 20. **Don’t sit on the bike when it’s on the stand** – Can damage the stand or cause it to fall.  
 21. **Always park the bike inside the gate before sleeping** – If you’ve used it during the day, ensure it’s safely parked inside the compound before you go to bed.  
