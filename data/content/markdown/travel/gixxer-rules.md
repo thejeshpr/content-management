@@ -32,8 +32,7 @@ These instructions are for **our own safety** and to keep the bike in top condit
 25. **Always return home by 8:30 PM** – If you’re getting late, call and inform in advance.  
 26. **Do not skip traffic signals** – Follow all traffic rules and signals without exceptions.  
 27. **Do not park in No Parking zones** – Avoid fines and unnecessary trouble.  
-28. **Do not park exposed to the sun for long** – Prevents paint and seat from fading or cracking.  
-29. **A message for you:**  
+28. **A message for you:**  
    I’ve taken good care of this Gixxer all along — even thought about selling it a few times, but didn’t, because it means something.  
    Now it’s your turn to keep it running strong and in good condition.  
    Take care of it, and it’ll take care of you on every ride. ❤️🏍️  
