@@ -17,7 +17,7 @@ These instructions are for **our own safety** and to keep the bike in top condit
 10. **No long drives** – Keep it for short or essential city rides only.  
 11. **No long-distance temple runs** – Avoid long religious trips or outstation rides.  
 12. **Check engine oil regularly** – Maintain good engine health.  
-13. **Keep the bike clean** – Wash and wipe regularly.  
+13. **Keep the bike clean** – Wash and wipe regularly and check check break pads regularly.
 14. **No helmet, no bike** – Always wear a helmet, no exceptions.  
 15. **Always park in a safe, designated place** – Avoid no-parking zones or direct sunlight for long hours.  
 16. **Report any damage immediately** – Even small scratches or dents.  
