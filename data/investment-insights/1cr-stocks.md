@@ -1,4 +1,4 @@
-# 🪙 10-Year Stock Investment Plan
+# 🪙 10-Year Stock Investment Plan (India)
 
 ## 🎯 Goal Summary
 - **Target Amount:** ₹1 Crore  
@@ -13,22 +13,23 @@
 
 ## 📊 Suggested Stock Portfolio (10 Stocks)
 
-| No | Stock | Allocation % | Monthly SIP (₹) | Notes |
-|----|--------|---------------|-----------------|-------|
-| 1 | **HDFC Bank Ltd** | 12% | ₹3,600 | Core & defensive; strong retail banking leader |
-| 2 | **Bajaj Finance Ltd** | 8% | ₹2,400 | Aggressive growth; high ROE and digital NBFC |
-| 3 | **Reliance Industries Ltd** | 12% | ₹3,600 | Diversified business; telecom, retail, energy |
-| 4 | **Larsen & Toubro (L&T)** | 10% | ₹3,000 | Infrastructure leader with steady order book |
-| 5 | **Tata Consultancy Services (TCS)** | 10% | ₹3,000 | Stable IT compounder, strong dividend record |
-| 6 | **Infosys Ltd** | 8% | ₹2,400 | Reliable IT performer, solid growth in digital services |
-| 7 | **Hindustan Unilever Ltd (HUL)** | 8% | ₹2,400 | FMCG leader, consistent cash flows |
-| 8 | **ITC Ltd** | 7% | ₹2,100 | Diversified FMCG and high dividend yield |
-| 9 | **Asian Paints Ltd** | 8% | ₹2,400 | Consumer leader with steady volume growth |
-| 10 | **DMart (Avenue Supermarts)** | 7% | ₹2,100 | Expanding retail business, efficient operations |
+| No | Stock | NSE Ticker | Allocation % | Monthly SIP (₹) | Notes |
+|----|--------|-------------|---------------|-----------------|-------|
+| 1 | **HDFC Bank Ltd** | `HDFCBANK` | 12% | ₹3,600 | Core & defensive; strong retail banking leader |
+| 2 | **Bajaj Finance Ltd** | `BAJFINANCE` | 8% | ₹2,400 | Aggressive growth; high ROE and digital NBFC |
+| 3 | **Reliance Industries Ltd** | `RELIANCE` | 12% | ₹3,600 | Diversified business; telecom, retail, energy |
+| 4 | **Larsen & Toubro Ltd (L&T)** | `LT` | 10% | ₹3,000 | Infrastructure leader with steady order book |
+| 5 | **Tata Consultancy Services Ltd (TCS)** | `TCS` | 10% | ₹3,000 | Stable IT compounder, strong dividend record |
+| 6 | **Infosys Ltd** | `INFY` | 8% | ₹2,400 | Reliable IT performer, solid growth in digital services |
+| 7 | **Hindustan Unilever Ltd (HUL)** | `HINDUNILVR` | 8% | ₹2,400 | FMCG leader, consistent cash flows |
+| 8 | **ITC Ltd** | `ITC` | 7% | ₹2,100 | Diversified FMCG and high dividend yield |
+| 9 | **Asian Paints Ltd** | `ASIANPAINT` | 8% | ₹2,400 | Consumer leader with steady volume growth |
+| 10 | **DMart (Avenue Supermarts Ltd)** | `DMART` | 7% | ₹2,100 | Expanding retail business, efficient operations |
 
 ---
 
 ## 🧩 Sector Allocation Summary
+
 | Sector | Allocation | Notes |
 |--------|-------------|-------|
 | Banking & Finance | 20% | Core long-term compounders |
@@ -50,7 +51,7 @@
 
 ---
 
-### 📈 Expected Outcome
+## 📈 Expected Outcome
 - **Total Investment:** ₹36 Lakhs (₹30k/month × 10 years)  
 - **Expected Portfolio Value:** ~₹1 Crore  
 - **CAGR Needed:** ~17–18%  
@@ -58,4 +59,5 @@
 
 ---
 
-*Disclaimer: This plan is for educational purposes only and should not be considered financial advice. Please consult your financial advisor before investing.*
+### 🏦 Reference: NSE Tickers
+You can verify live quotes on [nseindia.com](https://www.nseindia.com):
